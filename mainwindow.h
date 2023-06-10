@@ -21,7 +21,7 @@ public:
 private slots:
     void on_refreshButton_clicked();
 
-    void on_listView_doubleClicked(const QModelIndex &index);
+    void onListViewDoubleClicked(const QModelIndex &index);
 
 private:
     const QString dbConnectionName = "MainConnection";

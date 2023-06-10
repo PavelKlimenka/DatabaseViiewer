@@ -2,7 +2,7 @@
 #include "ui_infowindow.h"
 
 InfoWindow::InfoWindow(QWidget *parent) :
-    QWidget(parent),
+    QWidget(parent, Qt::Window),
     ui(new Ui::InfoWindow)
 {
     ui->setupUi(this);

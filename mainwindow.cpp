@@ -13,7 +13,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , infoWindow()
+    , infoWindow(this)
 {
     ui->setupUi(this);
 
@@ -28,13 +28,19 @@ MainWindow::MainWindow(QWidget *parent)
     if(!db.open())
     {
         QMessageBox::critical(this, "Fatal error", QString("Failed to open database connection: ") + db.lastError().text());
-        QApplication::exit(1);
+        exit(1);
     }
 
-    usersModel.setQuery("SELECT * FROM users", db);
+    usersModel.setQuery("SELECT * FROMM users", db);
+    if(usersModel.lastError().isValid())
+    {
+        QMessageBox::critical(this, "Failure", QString("Failed to fetch info on user items: %1").arg(usersModel.lastError().text()));
+        exit(1);
+    }
+
     ui->listView->setModel(&usersModel);
     ui->listView->setModelColumn(1);
-    connect(ui->listView, &QListView::doubleClicked, this, &MainWindow::on_listView_doubleClicked);
+    connect(ui->listView, &QListView::doubleClicked, this, &MainWindow::onListViewDoubleClicked);
 }
 
 MainWindow::~MainWindow()
@@ -51,11 +57,18 @@ void MainWindow::on_refreshButton_clicked()
 }
 
 
-void MainWindow::on_listView_doubleClicked(const QModelIndex &index)
+void MainWindow::onListViewDoubleClicked(const QModelIndex &index)
 {
     QSqlQueryModel* infoModel = new QSqlQueryModel();
     QUuid selectedUserId = usersModel.record(index.row()).value("user_id").toUuid();
+
     infoModel->setQuery(QString("SELECT * FROM items WHERE owner_id='%1'").arg(selectedUserId.toString()), db);
+    if(infoModel->lastError().isValid())
+    {
+        QMessageBox::critical(this, "Failure", QString("Failed to fetch info on user items: %1").arg(infoModel->lastError().text()));
+        delete infoModel;
+        return;
+    }
 
     infoWindow.setData(index.data().toString(), infoModel);
 
