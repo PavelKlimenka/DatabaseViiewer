@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
         exit(1);
     }
 
-    usersModel.setQuery("SELECT * FROMM users", db);
+    usersModel.setQuery("SELECT * FROM users", db);
     if(usersModel.lastError().isValid())
     {
         QMessageBox::critical(this, "Failure", QString("Failed to fetch info on user items: %1").arg(usersModel.lastError().text()));
